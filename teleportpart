@@ -1,0 +1,24 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local teleportPart = script.Parent
+local targetPlaceID = 0
+
+
+local TeleportModule = require(ReplicatedStorage:WaitForChild("TeleportModule"))
+
+local function onPartTouch(otherPart)
+
+	local player = Players:GetPlayerFromCharacter(otherPart.Parent)
+
+	if player and not player:GetAttribute("Teleporting") then
+		player:SetAttribute("Teleporting", true)
+
+
+		local teleportResult = TeleportModule.teleportWithRetry(targetPlaceID, {player})
+
+		player:SetAttribute("Teleporting", nil)
+	end
+end
+
+teleportPart.Touched:Connect(onPartTouch)
