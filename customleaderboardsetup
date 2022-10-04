@@ -1,0 +1,86 @@
+local players = game:GetService("Players")
+local frame = script.Parent.Frame
+local slots = frame.slots
+local temp = frame.Template
+
+local players_table = {}
+
+
+local dir = "Out"
+local style = "Quad"
+local dur = 0.5
+
+wait()
+
+game.StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
+
+
+local function cleanup(slot)
+
+	repeat
+		wait()
+	until slot.Position.X.Offset == 400
+	slot:Destroy()
+
+end
+
+local function remove(leaving)
+
+	if leaving then
+
+		players_table[leaving] = nil
+
+		local slot = slots:FindFirstChild(leaving)
+		slot:TweenPosition(UDim2.new(0, 400, 0, slot.Position.Y.Off), dir, style, dur, true)
+
+		local cor = coroutine.wrap(cleanup)
+		cor(slot)
+
+	end	
+end
+
+local function add()
+
+	local chil = players:GetChildren()
+	for c = 1, #chil do
+
+		if players_table[chil[c].Name] == nil then
+
+			players_table[chil[c].Name] = 1
+
+			local slot = temp:Clone()
+
+			slot.Name = chil[c].Name
+			slot.Text = slot.Name
+			slot.Parent = slots
+		end
+	end
+end
+
+local function adjust(leaving)
+
+	add()
+	remove(leaving)
+
+	local count = 0	
+	for key, value in pairs(players_table) do
+		count = count + 1
+		local slot = slots:FindFirstChild(key)
+
+		local ypos = 30 + (25+2)*(count-1)
+		slot:TweenPosition(UDim2.new(0, 0, 0, ypos), dir, style, dur, true)
+
+	end		
+end
+
+
+players.PlayerAdded:connect(function()
+	adjust()
+end)
+
+players.PlayerRemoving:connect(function(leaving)
+	adjust(leaving.Name)
+end) 
+ 
+
+adjust()
